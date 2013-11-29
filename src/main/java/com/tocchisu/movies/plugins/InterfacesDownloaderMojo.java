@@ -11,6 +11,8 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @goal download
  * 
  * @phase process-sources
+ * 
+ *        Usage : mvn clean install movies:donwload -Dmovies.interfacesDirectory='...'
  */
 public class InterfacesDownloaderMojo extends AbstractMojo {
 	/**
@@ -30,10 +32,8 @@ public class InterfacesDownloaderMojo extends AbstractMojo {
 		if (getLog().isWarnEnabled()) {
 			getLog().warn(
 					MessageFormat
-							.format("Movies files are downloaded in the default directory {0}. It is better to define a specific location to receive interfaces files.",
+							.format("Movies files are downloaded in the default directory {0}. It is better to define a specific location to receive interfaces files. Usage : -Dmovies.interfacesDirectory='...'",
 									interfacesDirectory.getAbsoluteFile()));
 		}
-		Object object = getPluginContext().get("project.build.directory");
-		getLog().info(object.toString());
 	}
 }
