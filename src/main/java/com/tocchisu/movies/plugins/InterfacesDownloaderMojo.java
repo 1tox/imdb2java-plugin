@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import com.tocchisu.movies.interfaces.IMDBUtils;
 
 /**
  * Goal which downloads IMDB interfaces
@@ -16,23 +16,21 @@ import org.apache.maven.plugin.MojoExecutionException;
  * 
  * @phase process-sources
  * 
- *        Usage : mvn clean install movies:donwload -Dmovies.directory='...'
+ *        Usage : mvn clean install movies:download -Dmovies.directory='...'
  */
 public class InterfacesDownloaderMojo extends AbstractMojo {
-	// URL for downloading plain text interfaces
-	private static final String	IMDB_INTERFACES_URL	= "http://www.website.com/information.asp";
 	/**
 	 * Location of the movie files.
 	 * 
 	 * @parameter expression="${movies.directory}" default-value="${basedir'/interfaces}"
 	 */
-	private File				moviesDirectory;
+	private File	moviesDirectory;
 	/**
-	 * Should the movie files automatically be downloaded even if a movie file is arleady present on the file system.
+	 * Should the movie files automatically be downloaded even if a movie file is already present on the file system.
 	 * 
-	 * @parameter expression="${movies.forceDownload}" default-value=true
+	 * @parameter expression="${movies.forceDownload}" default-value=false
 	 */
-	private boolean				forceDownload;
+	private boolean	forceDownload;
 
 	private static enum Protocol {
 		FTP, HTTP
@@ -51,8 +49,7 @@ public class InterfacesDownloaderMojo extends AbstractMojo {
 		}
 		URL url = null;
 		try {
-			url = new URL(IMDB_INTERFACES_URL);
-			FileUtils.copyURLToFile(url, new File(getMoviesDirectory(), "movies.txt"));
+			IMDBUtils.downloadInterfaces(new File(getMoviesDirectory(), "movies.txt"));
 		}
 		catch (IOException e) {
 			fail("Error while downloading IMDB movies files from {0}", url);
@@ -60,7 +57,7 @@ public class InterfacesDownloaderMojo extends AbstractMojo {
 	}
 
 	/**
-	 * Checks existence of the directory where the movies will be downloaded. If it doesn't exist, the method will create one.
+	 * Checks existence of the directory where the movies will be downloaded. If it doesn't exist, the method will create it.
 	 * 
 	 * @return A safe directory location to download movies
 	 * @throws MojoExecutionException
