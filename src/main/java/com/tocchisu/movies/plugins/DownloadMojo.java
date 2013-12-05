@@ -2,12 +2,12 @@ package com.tocchisu.movies.plugins;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import com.tocchisu.movies.interfaces.IMDBInterfacesManager;
 
 /**
  * Goal which downloads IMDB interfaces (Plain text files describing IMDB movies, actors, ratings, movie genres, etc.)
@@ -19,16 +19,6 @@ import org.apache.maven.plugin.MojoExecutionException;
  *        Usage : mvn clean install movies:download -Dmovies.directory='...'
  */
 public class DownloadMojo extends AbstractMojo {
-	/**
-	 * URL for downloading plain text interfaces
-	 */
-	private static final String	IMDB_INTERFACE_URL	= "{0}/{1}.list.gz";
-	// Mirrors for FTP downloads
-	private static final String	DE_MIRROR			= "ftp://ftp.fu-berlin.de/pub/misc/movies/database";
-	@SuppressWarnings("unused")
-	private static final String	FI_MIRROR			= "ftp://ftp.funet.fi/pub/mirrors/ftp.imdb.com/pub";
-	@SuppressWarnings("unused")
-	private static final String	SW_MIRROR			= "ftp://ftp.sunet.se/pub/tv+movies/imdb";
 
 	private static enum Protocol {
 		FTP, HTTP
@@ -60,12 +50,10 @@ public class DownloadMojo extends AbstractMojo {
 		}
 		URL url = null;
 		try {
-			URL sourceURL = getSourceURL("iso-aka-titles.list.gz");
-			File destinationFile = new File(getTargetDirectory(), sourceURL.getFile());
-			Utils.download(sourceURL, destinationFile);
+			IMDBInterfacesManager.download("movies", getTargetDirectory());
 		}
 		catch (IOException e) {
-			fail("Error while downloading IMDB movies files from {0}", url);
+			fail("Error while downloading IMDB movies files from {0}", e, url);
 		}
 	}
 
@@ -112,7 +100,18 @@ public class DownloadMojo extends AbstractMojo {
 		throw new MojoExecutionException(MessageFormat.format(message, params));
 	}
 
-	private URL getSourceURL(String interfaceName) throws MalformedURLException {
-		return new URL(MessageFormat.format(IMDB_INTERFACE_URL, DE_MIRROR, interfaceName));
+	/**
+	 * Utility method to log message errors in Maven console and fails tests execution
+	 * 
+	 * @param message
+	 *            The message pattern to log
+	 * @param cause
+	 *            Subsequent error
+	 * @param params
+	 *            The optional params to apply to the message pattern
+	 * @throws MojoExecutionException
+	 */
+	private void fail(String message, Throwable cause, Object... params) throws MojoExecutionException {
+		throw new MojoExecutionException(MessageFormat.format(message, params), cause);
 	}
 }
