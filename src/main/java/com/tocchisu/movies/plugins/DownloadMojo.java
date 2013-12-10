@@ -10,7 +10,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import com.tocchisu.movies.interfaces.IMDBInterfacesManager;
 
 /**
- * Goal which downloads IMDB interfaces (Plain text files describing IMDB movies, actors, ratings, movie genres, etc.)
+ * IMDB regularly provides plain text data files, called "interfaces", that stores useful informations about movies, actors, genre, ratings, etc. These files,
+ * can be held locally by downloading them at <a href="http://www.imdb.com/interfaces">http://www.imdb.com/interfaces</a>.
+ * This class describes a maven goal which downloads IMDB interfaces.
  * 
  * @goal download
  * 
@@ -50,7 +52,7 @@ public class DownloadMojo extends AbstractMojo {
 		}
 		URL url = null;
 		try {
-			IMDBInterfacesManager.download("movies", getTargetDirectory());
+			IMDBInterfacesManager.download("iso-aka-titles", getTargetDirectory());
 		}
 		catch (IOException e) {
 			fail("Error while downloading IMDB movies files from {0}", e, url);
