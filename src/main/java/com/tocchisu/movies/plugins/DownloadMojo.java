@@ -2,11 +2,12 @@ package com.tocchisu.movies.plugins;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.text.MessageFormat;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import com.tocchisu.movies.interfaces.DownloadStatusListener;
 import com.tocchisu.movies.interfaces.IMDBInterfacesManager;
 
 /**
@@ -50,12 +51,20 @@ public class DownloadMojo extends AbstractMojo {
 		if (Protocol.valueOf(StringUtils.upperCase(protocol)) == null) {
 			fail("Protocol not allowed. Available protocols are {0}", (Object[]) Protocol.values());
 		}
-		URL url = null;
+		checkTargetDirectory();
+		downloadInterface("iso-aka-titles", targetDirectory);
+		downloadInterface("technical", targetDirectory);
+		downloadInterface("movies", targetDirectory);
+
+	}
+
+	private void downloadInterface(String interfaceName, File destinationDirectory) throws MojoExecutionException {
+		DownloadStatusListener listener = new InterfaceDownloadListener(interfaceName);
 		try {
-			IMDBInterfacesManager.download("iso-aka-titles", getTargetDirectory());
+			IMDBInterfacesManager.download(interfaceName, destinationDirectory, listener);
 		}
 		catch (IOException e) {
-			fail("Error while downloading IMDB movies files from {0}", e, url);
+			fail("Error while downloading IMDB interface {0}", e, interfaceName);
 		}
 	}
 
@@ -65,7 +74,7 @@ public class DownloadMojo extends AbstractMojo {
 	 * @return A safe directory location to download movies
 	 * @throws MojoExecutionException
 	 */
-	private File getTargetDirectory() throws MojoExecutionException {
+	private File checkTargetDirectory() throws MojoExecutionException {
 		if (getLog().isInfoEnabled()) {
 			getLog().info(
 					MessageFormat
@@ -115,5 +124,26 @@ public class DownloadMojo extends AbstractMojo {
 	 */
 	private void fail(String message, Throwable cause, Object... params) throws MojoExecutionException {
 		throw new MojoExecutionException(MessageFormat.format(message, params), cause);
+	}
+
+	private class InterfaceDownloadListener implements DownloadStatusListener {
+		private String	fileName;
+
+		public InterfaceDownloadListener(String fileName) {
+			this.fileName = fileName;
+		}
+
+		@Override
+		public void beforeDownload(Long fileSize) {
+			getLog().info("Downloading " + fileName + "...");
+		}
+
+		@Override
+		public void onProgress(Long bytesCount, Long fileSize) {}
+
+		@Override
+		public void afterDownload(Long bytesCount, Long fileSize, File destinationFile) {
+			getLog().info("Downloaded " + FileUtils.byteCountToDisplaySize(bytesCount) + " at " + destinationFile.getAbsolutePath());
+		}
 	}
 }
