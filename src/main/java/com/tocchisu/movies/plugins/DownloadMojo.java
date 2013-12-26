@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import com.tocchisu.movies.interfaces.DownloadStatusListener;
+import com.tocchisu.movies.interfaces.FileAlreadyDownloaded;
 import com.tocchisu.movies.interfaces.IMDBInterfacesManager;
 
 /**
@@ -52,16 +53,27 @@ public class DownloadMojo extends AbstractMojo {
 			fail("Protocol not allowed. Available protocols are {0}", (Object[]) Protocol.values());
 		}
 		checkTargetDirectory();
+		downloadInterface("genres", targetDirectory);
+		downloadInterface("ratings", targetDirectory);
+		// downloadInterface("movies", targetDirectory);
 		downloadInterface("iso-aka-titles", targetDirectory);
 		downloadInterface("technical", targetDirectory);
-		downloadInterface("movies", targetDirectory);
-
 	}
 
 	private void downloadInterface(String interfaceName, File destinationDirectory) throws MojoExecutionException {
 		DownloadStatusListener listener = new InterfaceDownloadListener(interfaceName);
 		try {
-			IMDBInterfacesManager.download(interfaceName, destinationDirectory, listener);
+			if (forceDownload) {
+				IMDBInterfacesManager.reDownload(interfaceName, destinationDirectory, listener);
+			}
+			else {
+				try {
+					IMDBInterfacesManager.download(interfaceName, destinationDirectory, listener);
+				}
+				catch (FileAlreadyDownloaded e) {
+					getLog().info(e.getMessage() + ". File won't be downloaded");
+				}
+			}
 		}
 		catch (IOException e) {
 			fail("Error while downloading IMDB interface {0}", e, interfaceName);
