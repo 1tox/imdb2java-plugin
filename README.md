@@ -1,4 +1,4 @@
-Maven plugin for handling features provided by imdb2java-core API
+Maven plugin for handling features provided by <a href="https://github.com/1tox/imdb2java-core">imdb2java-core</a> API
 
 Usage:
 - First, get Maven <a href="http://maven.apache.org/download.cgi">here</a>
