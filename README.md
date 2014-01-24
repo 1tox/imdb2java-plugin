@@ -1,3 +1,5 @@
+Maven plugin for handling features provided by imdb2java-core API
+
 Usage:
 - First, get Maven <a href="http://maven.apache.org/download.cgi">here</a>
 - Then, go to your project location path and type : <br>
